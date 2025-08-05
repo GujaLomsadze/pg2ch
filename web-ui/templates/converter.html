@@ -1,0 +1,148 @@
+<!-- web-ui/templates/converter.html -->
+{% extends "base.html" %}
+
+{% block content %}
+<div class="row">
+    <!-- Control Panel -->
+    <div class="col-12 mb-3">
+        <div class="card">
+            <div class="card-body">
+                <div class="row align-items-center">
+                    <div class="col-md-6">
+                        <h5 class="card-title mb-0">
+                            <span class="text-primary">🔄</span>
+                            DDL Converter
+                        </h5>
+                        <small class="text-muted">Convert PostgreSQL DDL to ClickHouse format</small>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="btn-group me-2" role="group">
+                            <button type="button" class="btn btn-outline-primary" onclick="loadExample()">
+                                📋 Examples
+                            </button>
+                            <button type="button" class="btn btn-outline-secondary" onclick="clearEditors()">
+                                🧹 Clear
+                            </button>
+                            <input type="file" id="fileInput" accept=".sql" style="display: none;" onchange="loadFile(event)">
+                            <button type="button" class="btn btn-outline-info" onclick="document.getElementById('fileInput').click()">
+                                📁 Upload
+                            </button>
+                        </div>
+                        <div class="btn-group" role="group">
+                            <button type="button" class="btn btn-outline-success" onclick="downloadResult()" id="downloadBtn" disabled>
+                                💾 Download
+                            </button>
+                            <button type="button" class="btn btn-outline-warning" onclick="validateClickHouse()" id="validateBtn" disabled>
+                                ✅ Validate
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Editors Row -->
+    <div class="col-lg-6 mb-3">
+        <div class="card h-100">
+            <div class="card-header bg-postgres">
+                <h6 class="mb-0">
+                    <span class="text-primary">🐘</span>
+                    PostgreSQL DDL Input
+                </h6>
+            </div>
+            <div class="card-body p-0">
+                <textarea id="postgres-editor" placeholder="Paste your PostgreSQL DDL here...
+
+Example:
+CREATE TABLE users (
+    id SERIAL PRIMARY KEY,
+    name VARCHAR(255) NOT NULL,
+    email VARCHAR(255) UNIQUE,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);"></textarea>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-lg-6 mb-3">
+        <div class="card h-100">
+            <div class="card-header bg-clickhouse">
+                <h6 class="mb-0">
+                    <span class="text-success">⚡</span>
+                    ClickHouse DDL Output
+                    <button class="btn btn-sm btn-outline-secondary float-end" onclick="copyToClipboard()" id="copyBtn" disabled>
+                        📋 Copy
+                    </button>
+                </h6>
+            </div>
+            <div class="card-body p-0">
+                <textarea id="clickhouse-editor" placeholder="Converted ClickHouse DDL will appear here..." readonly></textarea>
+            </div>
+        </div>
+    </div>
+
+    <!-- Status and Metadata Row -->
+    <div class="col-12">
+        <div class="card">
+            <div class="card-body">
+                <!-- Conversion Status -->
+                <div id="status-area" class="mb-3">
+                    <div class="alert alert-info" role="alert">
+                        <strong>Ready!</strong> Paste your PostgreSQL DDL above to start converting.
+                    </div>
+                </div>
+
+                <!-- Metadata Display -->
+                <div id="metadata-area" style="display: none;">
+                    <h6>📊 Conversion Summary</h6>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div id="metadata-summary"></div>
+                        </div>
+                        <div class="col-md-6">
+                            <div id="metadata-details"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Validation Results -->
+                <div id="validation-area" style="display: none;">
+                    <h6>🔍 Validation Results</h6>
+                    <div id="validation-results"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Examples Modal -->
+<div class="modal fade" id="examplesModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">📋 DDL Examples</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div id="examples-list">
+                    <div class="text-center">
+                        <div class="spinner-border" role="status">
+                            <span class="visually-hidden">Loading examples...</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+// Initialize the converter when page loads
+document.addEventListener('DOMContentLoaded', function() {
+    initializeConverter();
+});
+</script>
+{% endblock %}

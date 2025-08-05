@@ -1,0 +1,52 @@
+services:
+  pg2ch-web:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: pg2ch-converter
+    ports:
+      - "5003:5003"
+    environment:
+      - FLASK_ENV=production
+      - SECRET_KEY=your-secret-key-change-this-in-production
+      - DEBUG=False
+      - HOST=0.0.0.0
+      - PORT=5003
+    volumes:
+      # Optional: Mount uploads directory for file persistence
+      - ./uploads:/app/static/uploads
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5003/api/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+    networks:
+      - pg2ch-network
+
+  # Optional: Add nginx reverse proxy for production
+  nginx:
+    image: nginx:alpine
+    container_name: pg2ch-nginx
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./ssl:/etc/nginx/ssl:ro  # Optional: For HTTPS
+    depends_on:
+      - pg2ch-web
+    restart: unless-stopped
+    networks:
+      - pg2ch-network
+    profiles:
+      - production  # Only start with --profile production
+
+networks:
+  pg2ch-network:
+    driver: bridge
+
+volumes:
+  pg2ch-uploads:
+    driver: local

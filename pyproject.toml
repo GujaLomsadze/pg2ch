@@ -1,0 +1,80 @@
+[build-system]
+requires = ["setuptools>=61.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "pg2ch"
+version = "0.1.1"
+description = "Convert PostgreSQL DDL to ClickHouse DDL"
+readme = "README.md"
+license = {text = "Apache-2.0"}
+authors = [
+    {name = "Guja Lomsadze", email = "lomsadze.guja@gmail.com"}
+]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: Apache Software License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Database",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+]
+requires-python = ">=3.9"
+dependencies = [
+    "sqlparse>=0.4.4",
+    "click>=8.0.0",
+    "pydantic>=2.0.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=7.0.0",
+    "pytest-cov>=4.0.0",
+    "black>=23.0.0",
+    "isort>=5.12.0",
+    "mypy>=1.0.0",
+    "pre-commit>=3.0.0",
+    "twine>=4.0.0",
+    "build>=0.10.0",
+]
+
+[project.urls]
+Homepage = "https://github.com/GujaLomsadze/pg2ch"
+Repository = "https://github.com/GujaLomsadze/pg2ch"
+Documentation = "https://github.com/GujaLomsadze"
+"Bug Reports" = "https://github.com/GujaLomsadze/pg2ch/issues"
+
+[project.scripts]
+pg2ch = "pg2ch.main:cli"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.black]
+line-length = 88
+target-version = ["py38"]
+
+[tool.isort]
+profile = "black"
+src_paths = ["src", "tests"]
+
+[tool.mypy]
+python_version = "3.8"
+strict = true
+warn_return_any = true
+warn_unused_configs = true
+
+[[tool.mypy.overrides]]
+module = "tests.*"
+disallow_untyped_defs = false
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+python_files = ["test_*.py"]
+python_classes = ["Test*"]
+python_functions = ["test_*"]
+addopts = "--cov=pg2ch --cov-report=html --cov-report=term-missing"
